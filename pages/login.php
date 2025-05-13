@@ -58,10 +58,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" placeholder="Enter your password" required>
 
-            <button type="submit">Login</button>
+            <!-- Button Container -->
+            <div class="button-container">
+                <button type="submit">Login</button>
+            </div>
         </form>
 
-        <p>Don't have an account? <a href="register.php" class="button">Register here</a></p>
+        <!-- Centered Text with Link -->
+        <div class="button-container">
+            <p>Don't have an account? 
+                <a href="register.php" class="button">Register here</a>
+            </p>
+        </div>
     </div>
 </div>
 </body>

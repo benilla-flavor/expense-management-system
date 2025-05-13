@@ -135,6 +135,45 @@ form input[type="submit"]:hover {
     transform: scale(1.05);
 }
 
+/* Buttons */
+button,
+a.button {
+    background: var(--accent);
+    color: var(--white);
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-block; /* Ensures buttons behave like block elements */
+    text-align: center; /* Centers text inside the button */
+}
+
+button:hover,
+a.button:hover {
+    background: #388E3C; /* Darker green */
+    transform: scale(1.05);
+}
+
+/* Button Containers */
+.button-container {
+    text-align: center; /* Centers buttons horizontally */
+    margin-top: 1rem; /* Adds spacing above the buttons */
+}
+
+.form-container .button-container {
+    margin-top: 1.5rem; /* Adds more spacing in forms */
+}
+
+.modal-content .button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers buttons horizontally */
+    gap: 1rem; /* Adds spacing between buttons */
+}
+
 /* Tables */
 table {
     width: 100%;
@@ -167,26 +206,6 @@ table td {
 table tr:hover {
     background: var(--gray);
     color: var(--primary);
-}
-
-/* Buttons */
-button,
-a.button {
-    background: var(--accent);
-    color: var(--white);
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 5px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-button:hover,
-a.button:hover {
-    background: #388E3C; /* Darker green */
-    transform: scale(1.05);
 }
 
 /* Notifications */
@@ -232,6 +251,29 @@ a.button:hover {
     transition: width 0.3s ease;
 }
 
+/* Chart Container */
+.chart-container {
+    background: var(--white);
+    border: 1px solid var(--gray);
+    border-radius: 8px;
+    padding: 1rem; /* Reduced padding */
+    margin: 2rem 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px; /* Limit the container width */
+    margin: 0 auto; /* Center the chart */
+}
+
+.chart-container h3 {
+    font-size: 1.5rem; /* Slightly smaller heading */
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.chart-container canvas {
+    max-width: 100%;
+    height: auto;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     header h1 {
@@ -243,163 +285,13 @@ a.button:hover {
         padding: 0.75rem;
         font-size: 0.9rem;
     }
-}
-/* Reports Section */
-.reports {
-    background: var(--white);
-    border: 1px solid var(--gray);
-    border-radius: 8px;
-    padding: 2rem;
-    margin: 2rem 0;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
 
-.reports h2 {
-    font-size: 2rem;
-    color: var(--primary);
-    margin-bottom: 1rem;
-}
+    .chart-container {
+        max-width: 300px; /* Even smaller on mobile */
+        padding: 0.75rem;
+    }
 
-.reports .chart-container {
-    background: var(--neutral-light);
-    border: 1px solid var(--gray);
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-top: 1rem;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.reports .chart-container canvas {
-    max-width: 100%;
-    height: auto;
-}
-
-/* Notifications Section */
-.notifications {
-    background: var(--white);
-    border: 1px solid var(--gray);
-    border-radius: 8px;
-    padding: 2rem;
-    margin: 2rem 0;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.notifications h2 {
-    font-size: 2rem;
-    color: var(--primary);
-    margin-bottom: 1rem;
-}
-
-.notifications ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.notifications ul li {
-    background: var(--neutral-light);
-    padding: 1rem;
-    border-left: 4px solid var(--accent);
-    margin-bottom: 1rem;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
-
-.notifications ul li.alert {
-    border-left-color: var(--alert);
-}
-
-.notifications ul li.success {
-    border-left-color: var(--accent);
-}
-
-.notifications ul li:hover {
-    transform: scale(1.02);
-}
-
-.notifications ul li p {
-    margin: 0;
-    font-size: 1rem;
-    color: var(--primary);
-}
-
-.notifications ul li span {
-    display: block;
-    font-size: 0.9rem;
-    color: var(--secondary);
-    margin-top: 0.5rem;
-}
-/* Form Container */
-.form-container {
-    background: var(--white);
-    border: 1px solid var(--gray);
-    border-radius: 8px;
-    padding: 2rem;
-    max-width: 400px;
-    margin: 2rem auto;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.form-container h2 {
-    font-size: 2rem;
-    color: var(--primary);
-    margin-bottom: 1rem;
-}
-
-/* Form Inputs */
-.form-container label {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--primary);
-}
-
-.form-container input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid var(--gray);
-    border-radius: 5px;
-    font-family: 'Inter', sans-serif;
-    font-size: 1rem;
-    margin-bottom: 1rem;
-    transition: border-color 0.3s ease;
-}
-
-.form-container input:focus {
-    border-color: var(--accent);
-    outline: none;
-    box-shadow: 0 0 8px rgba(76, 175, 80, 0.2);
-}
-
-/* Buttons */
-.form-container button,
-.button {
-    background: var(--accent);
-    color: var(--white);
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 5px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.form-container button:hover,
-.button:hover {
-    background: #388E3C; /* Darker green */
-    transform: scale(1.05);
-}
-
-/* Error Messages */
-.error {
-    color: var(--alert);
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-}
-.success {
-    color: var(--accent);
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
+    .chart-container h3 {
+        font-size: 1.25rem; /* Smaller heading on mobile */
+    }
 }
