@@ -1,0 +1,68 @@
+-- Create the database (if not already created)
+CREATE DATABASE IF NOT EXISTS expense_management;
+USE expense_management;
+
+-- Users Table: Stores user account information
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY, -- Unique identifier for each user
+    username VARCHAR(50) NOT NULL UNIQUE, -- Unique username
+    email VARCHAR(100) NOT NULL UNIQUE, -- Unique email address
+    password_hash VARCHAR(255) NOT NULL, -- Hashed password for security
+    currency VARCHAR(10) DEFAULT 'USD', -- Preferred currency (default USD)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp of account creation
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- Last update timestamp
+);
+
+-- Categories Table: Stores predefined categories for transactions
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY, -- Unique identifier for each category
+    name VARCHAR(50) NOT NULL UNIQUE, -- Name of the category (e.g., Food, Entertainment)
+    type ENUM('income', 'expense') NOT NULL, -- Type of category: income or expense
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Timestamp of category creation
+);
+
+-- Transactions Table: Stores user transactions
+CREATE TABLE transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY, -- Unique identifier for each transaction
+    user_id INT NOT NULL, -- Foreign key linking to the users table
+    type ENUM('income', 'expense') NOT NULL, -- Type of transaction: income or expense
+    amount DECIMAL(10, 2) NOT NULL, -- Amount of the transaction
+    category_id INT NOT NULL, -- Foreign key linking to the categories table
+    date DATE NOT NULL, -- Date of the transaction
+    notes TEXT, -- Optional notes for the transaction
+    is_recurring BOOLEAN DEFAULT FALSE, -- Indicates if the transaction is recurring
+    frequency ENUM('monthly', 'yearly'), -- Frequency of recurrence (if applicable)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp of transaction creation
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, -- Cascade delete for user deletion
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE -- Cascade delete for category deletion
+);
+
+-- Budgets Table: Stores user-defined budgets
+CREATE TABLE budgets (
+    id INT AUTO_INCREMENT PRIMARY KEY, -- Unique identifier for each budget
+    user_id INT NOT NULL, -- Foreign key linking to the users table
+    category_id INT NOT NULL, -- Foreign key linking to the categories table
+    limit_amount DECIMAL(10, 2) NOT NULL, -- Budget limit amount
+    start_date DATE NOT NULL, -- Start date of the budget period
+    end_date DATE NOT NULL, -- End date of the budget period
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp of budget creation
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, -- Cascade delete for user deletion
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE -- Cascade delete for category deletion
+);
+
+-- Notifications Table: Stores notifications for users (e.g., budget alerts)
+CREATE TABLE notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY, -- Unique identifier for each notification
+    user_id INT NOT NULL, -- Foreign key linking to the users table
+    message TEXT NOT NULL, -- Notification message
+    is_read BOOLEAN DEFAULT FALSE, -- Indicates if the notification has been read
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp of notification creation
+    UNIQUE (user_id, message), -- Prevent duplicate notifications for the same user and message
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE -- Cascade delete for user deletion
+);
+
+-- Indexes for Performance Optimization
+CREATE INDEX idx_transactions_user_id ON transactions(user_id); -- Speed up queries filtering by user_id
+CREATE INDEX idx_transactions_category_id ON transactions(category_id); -- Speed up queries filtering by category_id
+CREATE INDEX idx_budgets_user_id ON budgets(user_id); -- Speed up queries filtering by user_id
+CREATE INDEX idx_notifications_user_id ON notifications(user_id); -- Speed up queries filtering by user_id
