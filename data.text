@@ -1,0 +1,58 @@
+-- Insert 10 Sample Users
+INSERT INTO users (username, email, password_hash, currency) VALUES
+('john_doe', 'john.doe@example.com', '$2y$10$hashedpassword1', 'USD'),
+('jane_smith', 'jane.smith@example.com', '$2y$10$hashedpassword2', 'EUR'),
+('alice_jones', 'alice.jones@example.com', '$2y$10$hashedpassword3', 'GBP'),
+('michael_brown', 'michael.brown@example.com', '$2y$10$hashedpassword4', 'USD'),
+('sarah_wilson', 'sarah.wilson@example.com', '$2y$10$hashedpassword5', 'CAD'),
+('david_miller', 'david.miller@example.com', '$2y$10$hashedpassword6', 'AUD'),
+('emily_davis', 'emily.davis@example.com', '$2y$10$hashedpassword7', 'USD'),
+('chris_evans', 'chris.evans@example.com', '$2y$10$hashedpassword8', 'EUR'),
+('lisa_taylor', 'lisa.taylor@example.com', '$2y$10$hashedpassword9', 'GBP'),
+('robert_clark', 'robert.clark@example.com', '$2y$10$hashedpassword10', 'USD');
+
+-- Insert Sample Categories
+INSERT INTO categories (name, type) VALUES
+('Food', 'expense'),
+('Transportation', 'expense'),
+('Entertainment', 'expense'),
+('Utilities', 'expense'),
+('Salary', 'income'),
+('Freelance', 'income'),
+('Rent', 'expense'),
+('Shopping', 'expense'),
+('Healthcare', 'expense'),
+('Investments', 'income');
+
+-- Insert Sample Budgets for Each User
+INSERT INTO budgets (user_id, category_id, limit_amount, start_date, end_date) VALUES
+(1, 1, 200.00, '2023-10-01', '2023-10-31'), -- John Doe: Food budget
+(1, 2, 100.00, '2023-10-01', '2023-10-31'), -- John Doe: Transportation budget
+(2, 3, 150.00, '2023-10-01', '2023-10-31'), -- Jane Smith: Entertainment budget
+(2, 4, 300.00, '2023-10-01', '2023-10-31'), -- Jane Smith: Utilities budget
+(3, 5, 2000.00, '2023-10-01', '2023-10-31'), -- Alice Jones: Salary income
+(4, 6, 500.00, '2023-10-01', '2023-10-31'), -- Michael Brown: Freelance income
+(5, 7, 800.00, '2023-10-01', '2023-10-31'), -- Sarah Wilson: Rent budget
+(6, 8, 250.00, '2023-10-01', '2023-10-31'), -- David Miller: Shopping budget
+(7, 9, 100.00, '2023-10-01', '2023-10-31'), -- Emily Davis: Healthcare budget
+(8, 10, 1000.00, '2023-10-01', '2023-10-31'); -- Chris Evans: Investments income
+
+-- Insert Sample Transactions for Each User
+INSERT INTO transactions (user_id, type, amount, category_id, date, notes, is_recurring, frequency) VALUES
+(1, 'expense', 50.00, 1, '2023-10-01', 'Groceries for the week', 0, NULL), -- John Doe: Food expense
+(1, 'expense', 30.00, 2, '2023-10-02', 'Bus fare', 0, NULL), -- John Doe: Transportation expense
+(2, 'expense', 40.00, 3, '2023-10-03', 'Movie tickets', 0, NULL), -- Jane Smith: Entertainment expense
+(2, 'expense', 120.00, 4, '2023-10-04', 'Electricity bill', 1, 'monthly'), -- Jane Smith: Utilities expense
+(3, 'income', 2000.00, 5, '2023-10-05', 'Monthly salary', 1, 'monthly'), -- Alice Jones: Salary income
+(4, 'income', 500.00, 6, '2023-10-06', 'Freelance project payment', 0, NULL), -- Michael Brown: Freelance income
+(5, 'expense', 800.00, 7, '2023-10-07', 'Monthly rent', 1, 'monthly'), -- Sarah Wilson: Rent expense
+(6, 'expense', 200.00, 8, '2023-10-08', 'Clothes shopping', 0, NULL), -- David Miller: Shopping expense
+(7, 'expense', 80.00, 9, '2023-10-09', 'Doctor visit', 0, NULL), -- Emily Davis: Healthcare expense
+(8, 'income', 1000.00, 10, '2023-10-10', 'Stock dividends', 1, 'yearly'); -- Chris Evans: Investments income
+
+-- Insert Sample Notifications for Budget Alerts
+INSERT INTO notifications (user_id, message, is_read, created_at) VALUES
+(1, 'You have exceeded your budget for Food. Spent: $60.00, Limit: $50.00', 0, '2023-10-03 10:00:00'), -- John Doe: Food alert
+(2, 'You have exceeded your budget for Utilities. Spent: $130.00, Limit: $120.00', 0, '2023-10-05 12:00:00'), -- Jane Smith: Utilities alert
+(5, 'You have exceeded your budget for Rent. Spent: $850.00, Limit: $800.00', 0, '2023-10-08 14:00:00'), -- Sarah Wilson: Rent alert
+(6, 'You have exceeded your budget for Shopping. Spent: $260.00, Limit: $250.00', 0, '2023-10-10 16:00:00'); -- David Miller: Shopping alert
