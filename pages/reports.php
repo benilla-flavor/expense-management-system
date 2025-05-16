@@ -14,14 +14,46 @@ $transaction = new Transaction($pdo);
 $year = isset($_GET['year']) ? $_GET['year'] : date('Y');
 $month = isset($_GET['month']) ? $_GET['month'] : date('m');
 
+// Fetch monthly summary
 $summary = $transaction->getMonthlySummary($_SESSION['user_id'], $year, $month);
+
+// Calculate total income, expenses, and savings
+$totalIncome = 0;
+$totalExpenses = 0;
+
+foreach ($summary as $row) {
+    if ($row['type'] === 'income') {
+        $totalIncome += $row['total'];
+    } elseif ($row['type'] === 'expense') {
+        $totalExpenses += $row['total'];
+    }
+}
+
+$savings = $totalIncome - $totalExpenses;
 ?>
 
 <div class="container">
-    <div class="reports">
-        <h2>Reports</h2>
+    <h1>Reports</h1>
 
-        <!-- Report Form -->
+    <!-- Report Summary Widgets -->
+    <div class="dashboard-widgets">
+        <div class="widget">
+            <h3>Total Income</h3>
+            <p>$<?= number_format($totalIncome, 2) ?></p>
+        </div>
+        <div class="widget">
+            <h3>Total Expenses</h3>
+            <p>$<?= number_format($totalExpenses, 2) ?></p>
+        </div>
+        <div class="widget">
+            <h3>Savings</h3>
+            <p>$<?= number_format($savings, 2) ?></p>
+        </div>
+    </div>
+
+    <!-- Report Form -->
+    <div class="form-container">
+        <h2>Generate Report</h2>
         <form method="GET" class="report-form">
             <label for="year">Year:</label>
             <input type="number" name="year" id="year" value="<?= $year ?>" required>
@@ -29,10 +61,15 @@ $summary = $transaction->getMonthlySummary($_SESSION['user_id'], $year, $month);
             <label for="month">Month:</label>
             <input type="number" name="month" id="month" value="<?= $month ?>" min="1" max="12" required>
 
-            <button type="submit">Generate Report</button>
+            <!-- Button Container -->
+            <div class="button-container">
+                <button type="submit">Generate Report</button>
+            </div>
         </form>
+    </div>
 
-        <!-- Monthly Summary -->
+    <!-- Monthly Summary -->
+    <div class="table-container">
         <h3>Monthly Summary (<?= date('F Y', strtotime("$year-$month-01")) ?>)</h3>
         <table>
             <tr>

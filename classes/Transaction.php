@@ -1,35 +1,59 @@
 <?php
+require_once __DIR__ . '/Budget.php'; // Include the Budget class
+
 class Transaction {
     private $pdo;
+    private $budget; // Add a reference to the Budget class
 
     public function __construct($pdo) {
         $this->pdo = $pdo;
+        $this->budget = new Budget($pdo); // Initialize the Budget class
     }
 
-    // Add a transaction (updated to include frequency)
-    public function addTransaction($userId, $type, $amount, $category, $date, $notes, $isRecurring, $frequency = null) {
-        $stmt = $this->pdo->prepare("INSERT INTO transactions (user_id, type, amount, category, date, notes, is_recurring, frequency) 
-                                     VALUES (:user_id, :type, :amount, :category, :date, :notes, :is_recurring, :frequency)");
-        return $stmt->execute([
+    // Add a transaction (updated to use category_id)
+    public function addTransaction($userId, $type, $amount, $categoryId, $date, $notes, $isRecurring, $frequency = null) {
+        $stmt = $this->pdo->prepare("INSERT INTO transactions (user_id, type, amount, category_id, date, notes, is_recurring, frequency) 
+                                     VALUES (:user_id, :type, :amount, :category_id, :date, :notes, :is_recurring, :frequency)");
+        $success = $stmt->execute([
             'user_id' => $userId,
             'type' => $type,
             'amount' => $amount,
-            'category' => $category,
+            'category_id' => $categoryId,
             'date' => $date,
             'notes' => $notes,
             'is_recurring' => $isRecurring,
             'frequency' => $frequency
         ]);
+
+        if ($success) {
+            // Check for budget alerts after adding the transaction
+            $this->budget->checkBudgetAlerts($userId);
+        }
+
+        return $success;
     }
-    // Get all transactions for a user
+
+    // Get all transactions for a user (updated to join categories table)
     public function getTransactions($userId) {
-        $stmt = $this->pdo->prepare("SELECT * FROM transactions WHERE user_id = :user_id ORDER BY date DESC");
+        $query = "SELECT t.id, t.type, t.amount, c.name AS category_name, t.date, t.notes, t.is_recurring, t.frequency 
+                  FROM transactions t 
+                  LEFT JOIN categories c ON t.category_id = c.id 
+                  WHERE t.user_id = :user_id 
+                  ORDER BY t.date DESC";
+
+        $stmt = $this->pdo->prepare($query);
         $stmt->execute(['user_id' => $userId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     // Get recurring transactions for a user
     public function getRecurringTransactions($userId) {
-        $stmt = $this->pdo->prepare("SELECT * FROM transactions WHERE user_id = :user_id AND is_recurring = 1");
+        $query = "SELECT t.id, t.type, t.amount, c.name AS category_name, t.date, t.notes, t.frequency 
+                  FROM transactions t 
+                  LEFT JOIN categories c ON t.category_id = c.id 
+                  WHERE t.user_id = :user_id AND t.is_recurring = 1";
+
+        $stmt = $this->pdo->prepare($query);
         $stmt->execute(['user_id' => $userId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -47,7 +71,7 @@ class Transaction {
                 $futureTransactions[] = [
                     'type' => $transaction['type'],
                     'amount' => $transaction['amount'],
-                    'category' => $transaction['category'],
+                    'category_name' => $transaction['category_name'], // Use category_name
                     'date' => $startDate->format('Y-m-d'),
                     'notes' => $transaction['notes']
                 ];
@@ -63,80 +87,48 @@ class Transaction {
         return $futureTransactions;
     }
 
-        // Bulk import transactions from CSV
-        public function importTransactions($userId, $file) {
-            if (($handle = fopen($file, "r")) !== FALSE) {
-                $header = fgetcsv($handle); // Skip header row
-                while (($data = fgetcsv($handle)) !== FALSE) {
-                    $type = $data[0];
-                    $amount = $data[1];
-                    $category = $data[2];
-                    $date = $data[3];
-                    $notes = $data[4] ?? '';
-                    $isRecurring = $data[5] ?? 0;
-                    $frequency = $data[6] ?? null;
-    
-                    $this->addTransaction($userId, $type, $amount, $category, $date, $notes, $isRecurring, $frequency);
-                }
-                fclose($handle);
-                return true;
-            }
-            return false;
-        }
-    
-        // Export transactions to CSV
-        public function exportTransactions($userId) {
-            $transactions = $this->getTransactions($userId);
-    
-            $output = fopen('php://output', 'w');
-            header('Content-Type: text/csv');
-            header('Content-Disposition: attachment; filename="transactions.csv"');
-    
-            fputcsv($output, ['Type', 'Amount', 'Category', 'Date', 'Notes', 'Is Recurring', 'Frequency']);
-    
-            foreach ($transactions as $t) {
-                fputcsv($output, [
-                    $t['type'],
-                    $t['amount'],
-                    $t['category'],
-                    $t['date'],
-                    $t['notes'],
-                    $t['is_recurring'],
-                    $t['frequency']
-                ]);
-            }
-    
-            fclose($output);
-            exit;
+    // Generate monthly summary
+    public function getMonthlySummary($userId, $year, $month) {
+        $stmt = $this->pdo->prepare("SELECT SUM(amount) as total, type FROM transactions 
+                                     WHERE user_id = :user_id AND YEAR(date) = :year AND MONTH(date) = :month 
+                                     GROUP BY type");
+        $stmt->execute(['user_id' => $userId, 'year' => $year, 'month' => $month]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Edit a transaction (updated to use category_id)
+    public function editTransaction($transactionId, $type, $amount, $categoryId, $date, $notes, $isRecurring, $frequency = null) {
+        $stmt = $this->pdo->prepare("UPDATE transactions 
+                                     SET type = :type, amount = :amount, category_id = :category_id, date = :date, notes = :notes, is_recurring = :is_recurring, frequency = :frequency 
+                                     WHERE id = :id");
+        $success = $stmt->execute([
+            'type' => $type,
+            'amount' => $amount,
+            'category_id' => $categoryId,
+            'date' => $date,
+            'notes' => $notes,
+            'is_recurring' => $isRecurring,
+            'frequency' => $frequency,
+            'id' => $transactionId
+        ]);
+
+        if ($success) {
+            // Retrieve the user ID of the transaction being edited
+            $stmt = $this->pdo->prepare("SELECT user_id FROM transactions WHERE id = :id");
+            $stmt->execute(['id' => $transactionId]);
+            $userId = $stmt->fetch(PDO::FETCH_ASSOC)['user_id'];
+
+            // Check for budget alerts after editing the transaction
+            $this->budget->checkBudgetAlerts($userId);
         }
 
-        // Generate monthly summary
-        public function getMonthlySummary($userId, $year, $month) {
-            $stmt = $this->pdo->prepare("SELECT SUM(amount) as total, type FROM transactions 
-                                         WHERE user_id = :user_id AND YEAR(date) = :year AND MONTH(date) = :month 
-                                         GROUP BY type");
-            $stmt->execute(['user_id' => $userId, 'year' => $year, 'month' => $month]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        }
-        // Edit a transaction
-        public function editTransaction($transactionId, $type, $amount, $category, $date, $notes, $isRecurring, $frequency = null) {
-            $stmt = $this->pdo->prepare("UPDATE transactions SET type = :type, amount = :amount, category = :category, date = :date, notes = :notes, is_recurring = :is_recurring, frequency = :frequency WHERE id = :id");
-            return $stmt->execute([
-                'type' => $type,
-                'amount' => $amount,
-                'category' => $category,
-                'date' => $date,
-                'notes' => $notes,
-                'is_recurring' => $isRecurring,
-                'frequency' => $frequency,
-                'id' => $transactionId
-            ]);
-        }
-    
-        // Delete a transaction
-        public function deleteTransaction($transactionId) {
-            $stmt = $this->pdo->prepare("DELETE FROM transactions WHERE id = :id");
-            return $stmt->execute(['id' => $transactionId]);
-        }
+        return $success;
+    }
+
+    // Delete a transaction
+    public function deleteTransaction($transactionId) {
+        $stmt = $this->pdo->prepare("DELETE FROM transactions WHERE id = :id");
+        return $stmt->execute(['id' => $transactionId]);
+    }
 }
 ?>
